@@ -14,10 +14,6 @@
   },
   "author": "Jonas Luebbers",
   "license": "Unlicense",
-  "dependencies": {
-    "@nonphoto/animation-loop": "^1.0.0",
-    "@nonphoto/vector": "^1.0.2"
-  },
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
@@ -26,5 +22,9 @@
     "node-sass": "^4.5.3",
     "npm-run-all": "^4.1.1",
     "webpack": "^3.6.0"
+  },
+  "dependencies": {
+    "@nonphoto/animation-loop": "github:nonphoto/animation-loop#master",
+    "@nonphoto/vector": "github:nonphoto/vector#master"
   }
 }
