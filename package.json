@@ -1,30 +1,25 @@
 {
-  "name": "spring",
-  "version": "1.0.0",
-  "description": "A spring physics demo.",
-  "main": "src/main.js",
+  "name": "@nonphoto/spring",
+  "version": "0.0.1",
+  "description": "Low-level spring physics toolbox",
+  "main": "src/index.js",
   "scripts": {
-    "scripts:build": "webpack --config webpack.config.js",
-    "scripts:watch": "npm run scripts:build -- --watch",
-    "styles:build": "node-sass src/styles/main.scss dist/styles/bundle.css --recursive --output-style=expanded",
-    "styles:watch": "npm run styles:build -- --watch",
-    "build": "npm-run-all *:build",
-    "watch": "npm run build && npm-run-all --parallel *:watch",
-    "server": "http-server -o"
+    "prepublish": "pnpm build",
+    "build": "tsup --format esm ./src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [
+    "spring",
+    "physics",
+    "animation"
+  ],
   "author": "Jonas Luebbers",
-  "license": "Unlicense",
+  "license": "MIT",
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.2",
-    "babel-preset-env": "^1.6.0",
-    "http-server": "^0.10.0",
-    "node-sass": "^4.5.3",
-    "npm-run-all": "^4.1.1",
-    "webpack": "^3.6.0"
+    "tsup": "7.2.0"
   },
-  "dependencies": {
-    "@nonphoto/animation-loop": "github:nonphoto/animation-loop#master",
-    "@nonphoto/vector": "github:nonphoto/vector#master"
+  "packageManager": "pnpm@8.7.0",
+  "engines": {
+    "node": "v18.16.1"
   }
 }
