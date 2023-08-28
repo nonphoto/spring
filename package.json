@@ -1,6 +1,6 @@
 {
   "name": "@nonphoto/spring",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Low-level spring physics toolbox",
   "files": [
     "dist",
@@ -9,11 +9,11 @@
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.mts"
     }
   },
   "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "scripts": {
     "prepublish": "pnpm build",
     "build": "tsup ./src/index.ts --dts --format esm",
