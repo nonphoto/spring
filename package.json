@@ -1,7 +1,8 @@
 {
   "name": "@nonphoto/spring",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Low-level spring physics toolbox",
+  "type": "module",
   "files": [
     "dist",
     "package.json"
@@ -16,7 +17,7 @@
   "types": "./dist/index.d.mts",
   "scripts": {
     "prepublish": "pnpm build",
-    "build": "tsup ./src/index.ts --dts --format esm",
+    "build": "tsup ./src/index.ts --dts --format esm --clean",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
