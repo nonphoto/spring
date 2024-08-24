@@ -1,0 +1,37 @@
+{
+  "name": "@nonphoto/spring",
+  "version": "0.0.2",
+  "description": "Low-level spring physics toolbox",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "prepublish": "pnpm build",
+    "build": "tsup ./src/index.ts --dts --format esm",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "spring",
+    "physics",
+    "animation"
+  ],
+  "author": "Jonas Luebbers",
+  "license": "MIT",
+  "devDependencies": {
+    "tsup": "7.2.0",
+    "typescript": "5.2.2"
+  },
+  "packageManager": "pnpm@8.7.0",
+  "engines": {
+    "node": "v18.16.1"
+  }
+}
