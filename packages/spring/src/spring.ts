@@ -30,7 +30,7 @@ export interface SpringOptions {
   dampingRatio?: number;
 }
 
-export function springSet(s: Partial<Spring>, o: SpringOptions): Spring {
+export function setOptions(s: Partial<Spring>, o: SpringOptions): Spring {
   const damping = o.damping
     ? o.damping
     : o.halflife
@@ -58,11 +58,11 @@ export function springSet(s: Partial<Spring>, o: SpringOptions): Spring {
   return s as Spring;
 }
 
-export function springCreate(options: SpringOptions): Spring {
-  return springSet({}, options);
+export function create(options: SpringOptions): Spring {
+  return setOptions({}, options);
 }
 
-export function springPosition(s: Spring, t: number) {
+export function position(s: Spring, t: number) {
   const exp = Math.exp(-s.halfDamping * t);
   return s.delta === 0
     ? s.end
@@ -71,7 +71,7 @@ export function springPosition(s: Spring, t: number) {
     : exp * (s.delta + (s.startVelocity + s.delta * s.halfDamping) * t) + s.end;
 }
 
-export function springVelocity(s: Spring, t: number) {
+export function velocity(s: Spring, t: number) {
   const exp = Math.exp(-s.halfDamping * t);
   const theta = s.dampedFrequency * t + s.phase;
   return s.dampedFrequency > 0
@@ -82,7 +82,7 @@ export function springVelocity(s: Spring, t: number) {
           (s.startVelocity + s.delta * s.halfDamping) * s.halfDamping * t);
 }
 
-export function springDuration(s: Spring, epsilon: number = 0.1) {
+export function duration(s: Spring, epsilon: number = 0.1) {
   const duration =
     -Math.log((Math.sign(s.delta) * epsilon) / s.amplitude) / s.halfDamping;
   return isNaN(duration) ? 0 : duration;
