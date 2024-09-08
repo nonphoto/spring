@@ -1,8 +1,4 @@
-import {
-  springCreate,
-  springDuration,
-  springPosition,
-} from "@nonphoto/spring/src/index";
+import { durationN, fromOptions, positionN } from "@nonphoto/spring/src/index";
 import { createWindowSize } from "@solid-primitives/resize-observer";
 import { createEffect } from "solid-js";
 
@@ -26,9 +22,9 @@ export default function () {
 
     const step = 2;
 
-    const spring = springCreate({
-      start: h(),
-      end: h() / 3,
+    const spring = fromOptions({
+      start: [h()],
+      end: [h() / 3],
       halflife: w() * 0.1,
     });
 
@@ -36,22 +32,22 @@ export default function () {
     context.lineWidth = 2;
 
     context.beginPath();
-    context.moveTo(0, spring.end);
-    context.lineTo(w(), spring.end);
+    context.moveTo(0, spring.end[0]);
+    context.lineTo(w(), spring.end[0]);
     context.strokeStyle = "lightgray";
     context.stroke();
 
     context.beginPath();
     context.moveTo(0, h());
     for (let x = 0; x < w(); x += step) {
-      const y = springPosition(spring, x);
+      const y = positionN(spring, x);
       context.lineTo(x, y);
     }
     context.strokeStyle = "#0000ff";
     context.stroke();
 
     context.beginPath();
-    const x = springDuration(spring, 1);
+    const x = durationN(spring, 1);
     console.log(spring);
     context.moveTo(x, 0);
     context.lineTo(x, h());

@@ -1,2 +1,2 @@
-export * from "./math";
-export * from "./spring";
+export * from "./math.js";
+export * from "./spring.js";

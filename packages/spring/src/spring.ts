@@ -1,28 +1,54 @@
 import {
+  add,
+  addN,
+  atan,
+  cos,
+  divN,
+  log,
+  maddN,
+  msubN,
+  mul,
+  mulN,
+  neg,
+  ones,
+  powN,
+  safeDiv,
+  sign,
+  sin,
+  sub,
+  Vec,
+  zeroes,
+} from "@thi.ng/vectors";
+import {
   dampingRatioToStiffness,
   frequencyToStiffness,
   halflifeToDamping,
-  square,
-} from "./math";
+} from "./math.js";
 
+export const defaultEpsilon = 0.1;
 export const defaultDamping = halflifeToDamping(1000);
 export const defaultStiffness = dampingRatioToStiffness(1, defaultDamping);
 
+const scratchVec: [number] = [0];
+
 export interface Spring {
   halfDamping: number;
-  start: number;
-  end: number;
-  delta: number;
-  startVelocity: number;
+  start: Vec;
+  end: Vec;
+  delta: Vec;
+  startVelocity: Vec;
   dampedFrequency: number;
-  amplitude: number;
-  phase: number;
+  amplitude: Vec;
+  phase: Vec;
+  theta: Vec;
+  cosTheta: Vec;
+  sinTheta: Vec;
 }
 
 export interface SpringOptions {
-  start?: number;
-  end?: number;
-  startVelocity?: number;
+  start?: Vec;
+  end?: Vec;
+  startVelocity?: Vec;
   damping?: number;
   stiffness?: number;
   halflife?: number;
@@ -30,7 +56,39 @@ export interface SpringOptions {
   dampingRatio?: number;
 }
 
-export function setOptions(s: Partial<Spring>, o: SpringOptions): Spring {
+export function isSpring(s: any): s is Spring {
+  return (
+    typeof s === "object" &&
+    s !== null &&
+    "halfDamping" in s &&
+    typeof s.halfDamping === "number" &&
+    "start" in s &&
+    Array.isArray(s.start) &&
+    "end" in s &&
+    Array.isArray(s.end) &&
+    "startVelocity" in s &&
+    Array.isArray(s.startVelocity) &&
+    "dampedFrequency" in s &&
+    typeof s.halfDamping === "number" &&
+    "amplitude" in s &&
+    Array.isArray(s.amplitude) &&
+    "phase" in s &&
+    Array.isArray(s.phase) &&
+    "theta" in s &&
+    Array.isArray(s.theta) &&
+    "cosTheta" in s &&
+    Array.isArray(s.cosTheta) &&
+    "sinTheta" in s &&
+    Array.isArray(s.sinTheta)
+  );
+}
+
+export function dampingAndStiffnessFromOptions(
+  o: Pick<
+    SpringOptions,
+    "stiffness" | "frequency" | "dampingRatio" | "damping" | "halflife"
+  >
+): [number, number] {
   const damping = o.damping
     ? o.damping
     : o.halflife
@@ -41,49 +99,125 @@ export function setOptions(s: Partial<Spring>, o: SpringOptions): Spring {
     : o.frequency
     ? frequencyToStiffness(o.frequency)
     : dampingRatioToStiffness(o.dampingRatio ?? 1, damping);
-  s.start = o.start ?? 0;
-  s.end = o.end ?? 1;
-  s.startVelocity = o.startVelocity ?? 0;
-  s.delta = s.start - s.end;
-  s.dampedFrequency = Math.sqrt(stiffness - square(damping) / 4);
-  const velocityDelta = s.startVelocity + s.delta * damping * 0.5;
-  s.amplitude =
-    Math.sign(s.delta) *
-    Math.sqrt(
-      square(velocityDelta) / square(s.dampedFrequency) + square(s.delta)
-    );
-  s.phase = Math.atan(velocityDelta / (-s.delta * s.dampedFrequency));
-  s.phase = isNaN(s.phase) ? 0 : s.phase;
+  return [damping, stiffness];
+}
+
+export function setOptions(s: Spring, o: SpringOptions): Spring {
+  const [damping, stiffness] = dampingAndStiffnessFromOptions(o);
   s.halfDamping = damping / 2;
-  return s as Spring;
+  const length =
+    o.start?.length ?? o.end?.length ?? o.startVelocity?.length ?? 1;
+  s.start = o.start ?? zeroes(length);
+  s.end = o.end ?? ones(length);
+  s.startVelocity = o.startVelocity ?? zeroes(length);
+  s.delta = sub([], s.start, s.end);
+  s.dampedFrequency = Math.sqrt(stiffness - (damping * damping) / 4);
+  const velocityDelta = maddN(
+    [],
+    s.delta,
+    damping * s.halfDamping,
+    s.startVelocity
+  );
+  s.amplitude = mul(
+    null,
+    sign([], s.delta),
+    safeDiv(
+      null,
+      powN([], velocityDelta, 2),
+      addN(null, powN([], s.delta, 2), s.dampedFrequency * s.dampedFrequency)
+    )
+  );
+  s.phase = atan(
+    null,
+    safeDiv([], velocityDelta, mulN(null, neg([], s.delta), s.dampedFrequency))
+  );
+  s.theta = [];
+  s.cosTheta = [];
+  s.sinTheta = [];
+  return s;
 }
 
-export function create(options: SpringOptions): Spring {
-  return setOptions({}, options);
-}
-
-export function position(s: Spring, t: number) {
+export function position(a: Vec | null, s: Spring, t: number): Vec {
   const exp = Math.exp(-s.halfDamping * t);
-  return s.delta === 0
-    ? s.end
-    : s.dampedFrequency > 0
-    ? s.amplitude * exp * Math.cos(s.dampedFrequency * t + s.phase) + s.end
-    : exp * (s.delta + (s.startVelocity + s.delta * s.halfDamping) * t) + s.end;
-}
-
-export function velocity(s: Spring, t: number) {
-  const exp = Math.exp(-s.halfDamping * t);
-  const theta = s.dampedFrequency * t + s.phase;
   return s.dampedFrequency > 0
-    ? -s.halfDamping * s.amplitude * exp * Math.cos(theta) -
-        s.dampedFrequency * s.amplitude * exp * Math.sin(theta)
-    : exp *
-        (s.startVelocity -
-          (s.startVelocity + s.delta * s.halfDamping) * s.halfDamping * t);
+    ? maddN(
+        null,
+        mul(
+          null,
+          cos(null, addN(a, s.phase, s.dampedFrequency * t)),
+          s.amplitude
+        ),
+        exp,
+        s.end
+      )
+    : maddN(
+        null,
+        maddN(
+          null,
+          maddN(a, s.delta, s.halfDamping, s.startVelocity),
+          t,
+          s.delta
+        ),
+        exp,
+        s.end
+      );
 }
 
-export function duration(s: Spring, epsilon: number = 0.1) {
-  const duration =
-    -Math.log((Math.sign(s.delta) * epsilon) / s.amplitude) / s.halfDamping;
-  return isNaN(duration) ? 0 : duration;
+export function fromOptions(o: SpringOptions): Spring {
+  return setOptions({} as Spring, o);
+}
+
+export function positionN(s: Spring, t: number): number {
+  return position(scratchVec, s, t)[0];
+}
+
+export function velocity(a: Vec | null, s: Spring, t: number) {
+  const exp = Math.exp(-s.halfDamping * t);
+  addN(s.theta, s.phase, s.dampedFrequency * t);
+  return s.dampedFrequency > 0
+    ? mul(
+        a,
+        add(
+          null,
+          mulN(null, cos(s.cosTheta, s.theta), -s.halfDamping * exp),
+          mulN(null, sin(s.sinTheta, s.theta), -s.dampedFrequency * exp)
+        ),
+        s.amplitude
+      )
+    : mulN(
+        null,
+        msubN(
+          null,
+          maddN(a, s.delta, s.halfDamping, s.startVelocity),
+          s.halfDamping * t,
+          s.startVelocity
+        ),
+        -exp
+      );
+}
+
+export function velocityN(s: Spring, t: number): number {
+  return velocity(scratchVec, s, t)[0];
+}
+
+export function duration(
+  a: Vec | null,
+  s: Spring,
+  epsilon: number = defaultEpsilon
+) {
+  return divN(
+    null,
+    neg(
+      null,
+      log(
+        null,
+        safeDiv(null, mulN(null, sign(a, s.delta), epsilon), s.amplitude)
+      )
+    ),
+    s.halfDamping
+  );
+}
+
+export function durationN(s: Spring, epsilon: number = defaultEpsilon) {
+  return duration(scratchVec, s, epsilon)[0];
 }
