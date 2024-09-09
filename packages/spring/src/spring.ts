@@ -15,6 +15,7 @@ import {
   safeDiv,
   sign,
   sin,
+  sqrt,
   sub,
   Vec,
   zeroes,
@@ -23,6 +24,7 @@ import {
   dampingRatioToStiffness,
   frequencyToStiffness,
   halflifeToDamping,
+  square,
 } from "./math.js";
 
 export const defaultEpsilon = 0.1;
@@ -83,12 +85,7 @@ export function isSpring(s: any): s is Spring {
   );
 }
 
-export function dampingAndStiffnessFromOptions(
-  o: Pick<
-    SpringOptions,
-    "stiffness" | "frequency" | "dampingRatio" | "damping" | "halflife"
-  >
-): [number, number] {
+export function setOptions(s: Partial<Spring>, o: SpringOptions): Spring {
   const damping = o.damping
     ? o.damping
     : o.halflife
@@ -99,11 +96,6 @@ export function dampingAndStiffnessFromOptions(
     : o.frequency
     ? frequencyToStiffness(o.frequency)
     : dampingRatioToStiffness(o.dampingRatio ?? 1, damping);
-  return [damping, stiffness];
-}
-
-export function setOptions(s: Spring, o: SpringOptions): Spring {
-  const [damping, stiffness] = dampingAndStiffnessFromOptions(o);
   s.halfDamping = damping / 2;
   const length =
     o.start?.length ?? o.end?.length ?? o.startVelocity?.length ?? 1;
@@ -111,20 +103,23 @@ export function setOptions(s: Spring, o: SpringOptions): Spring {
   s.end = o.end ?? ones(length);
   s.startVelocity = o.startVelocity ?? zeroes(length);
   s.delta = sub([], s.start, s.end);
-  s.dampedFrequency = Math.sqrt(stiffness - (damping * damping) / 4);
-  const velocityDelta = maddN(
-    [],
-    s.delta,
-    damping * s.halfDamping,
-    s.startVelocity
-  );
+  const squareDampedFrequency = Math.max(0, stiffness - square(damping) / 4);
+  s.dampedFrequency = Math.sqrt(squareDampedFrequency);
+  const velocityDelta = maddN([], s.delta, s.halfDamping, s.startVelocity);
   s.amplitude = mul(
     null,
     sign([], s.delta),
-    safeDiv(
+    sqrt(
       null,
-      powN([], velocityDelta, 2),
-      addN(null, powN([], s.delta, 2), s.dampedFrequency * s.dampedFrequency)
+      add(
+        null,
+        safeDiv(
+          null,
+          powN([], velocityDelta, 2),
+          mulN([], ones(length), squareDampedFrequency)
+        ),
+        powN([], s.delta, 2)
+      )
     )
   );
   s.phase = atan(
@@ -134,7 +129,11 @@ export function setOptions(s: Spring, o: SpringOptions): Spring {
   s.theta = [];
   s.cosTheta = [];
   s.sinTheta = [];
-  return s;
+  return s as Spring;
+}
+
+export function fromOptions(o: SpringOptions): Spring {
+  return setOptions({}, o);
 }
 
 export function position(a: Vec | null, s: Spring, t: number): Vec {
@@ -161,10 +160,6 @@ export function position(a: Vec | null, s: Spring, t: number): Vec {
         exp,
         s.end
       );
-}
-
-export function fromOptions(o: SpringOptions): Spring {
-  return setOptions({} as Spring, o);
 }
 
 export function positionN(s: Spring, t: number): number {

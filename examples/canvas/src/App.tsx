@@ -1,4 +1,9 @@
-import { durationN, fromOptions, positionN } from "@nonphoto/spring/src/index";
+import {
+  durationN,
+  fromOptions,
+  positionN,
+  velocityN,
+} from "@nonphoto/spring/src/index";
 import { createWindowSize } from "@solid-primitives/resize-observer";
 import { createEffect } from "solid-js";
 
@@ -26,10 +31,11 @@ export default function () {
       start: [h()],
       end: [h() / 3],
       halflife: w() * 0.1,
+      dampingRatio: 0.5,
     });
 
     const context = canvas.getContext("2d")!;
-    context.lineWidth = 2;
+    context.lineWidth = 4;
 
     context.beginPath();
     context.moveTo(0, spring.end[0]);
@@ -38,20 +44,28 @@ export default function () {
     context.stroke();
 
     context.beginPath();
-    context.moveTo(0, h());
+    context.moveTo(0, spring.start[0]);
     for (let x = 0; x < w(); x += step) {
       const y = positionN(spring, x);
       context.lineTo(x, y);
     }
-    context.strokeStyle = "#0000ff";
+    context.strokeStyle = "blue";
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(0, spring.end[0]);
+    for (let x = 0; x < w(); x += step) {
+      const y = velocityN(spring, x);
+      context.lineTo(x, spring.end[0] + y * 100);
+    }
+    context.strokeStyle = "orange";
     context.stroke();
 
     context.beginPath();
     const x = durationN(spring, 1);
-    console.log(spring);
     context.moveTo(x, 0);
     context.lineTo(x, h());
-    context.strokeStyle = "#ff0000";
+    context.strokeStyle = "red";
     context.stroke();
   });
 
