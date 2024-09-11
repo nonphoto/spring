@@ -41,5 +41,8 @@
   },
   "peerDependencies": {
     "@thi.ng/vectors": "7.12.0"
+  },
+  "dependencies": {
+    "@thi.ng/math": "5.11.9"
   }
 }

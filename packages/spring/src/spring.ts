@@ -1,56 +1,33 @@
-import {
-  add,
-  addN,
-  atan,
-  cos,
-  divN,
-  log,
-  maddN,
-  msubN,
-  mul,
-  mulN,
-  neg,
-  ones,
-  powN,
-  safeDiv,
-  sign,
-  sin,
-  sqrt,
-  sub,
-  Vec,
-  zeroes,
-} from "@thi.ng/vectors";
+import { safeDiv } from "@thi.ng/math";
 import {
   dampingRatioToStiffness,
   frequencyToStiffness,
   halflifeToDamping,
-  square,
 } from "./math.js";
 
-export const defaultEpsilon = 0.1;
+export const defaultEpsilon = 0.01;
 export const defaultDamping = halflifeToDamping(1000);
 export const defaultStiffness = dampingRatioToStiffness(1, defaultDamping);
 
-const scratchVec: [number] = [0];
-
-export interface Spring {
-  halfDamping: number;
-  start: Vec;
-  end: Vec;
-  delta: Vec;
-  startVelocity: Vec;
-  dampedFrequency: number;
-  amplitude: Vec;
-  phase: Vec;
-  theta: Vec;
-  cosTheta: Vec;
-  sinTheta: Vec;
+function square(x: number): number {
+  return x * x;
 }
 
+export type Spring = [
+  delta: number,
+  end: number,
+  velocity: number,
+  amplitude: number,
+  phase: number,
+  halfDamping: number,
+  criticality: number
+];
+
 export interface SpringOptions {
-  start?: Vec;
-  end?: Vec;
-  startVelocity?: Vec;
+  start?: number;
+  end?: number;
+  delta?: number;
+  velocity?: number;
   damping?: number;
   stiffness?: number;
   halflife?: number;
@@ -60,159 +37,98 @@ export interface SpringOptions {
 
 export function isSpring(s: any): s is Spring {
   return (
-    typeof s === "object" &&
-    s !== null &&
-    "halfDamping" in s &&
-    typeof s.halfDamping === "number" &&
-    "start" in s &&
-    Array.isArray(s.start) &&
-    "end" in s &&
-    Array.isArray(s.end) &&
-    "startVelocity" in s &&
-    Array.isArray(s.startVelocity) &&
-    "dampedFrequency" in s &&
-    typeof s.halfDamping === "number" &&
-    "amplitude" in s &&
-    Array.isArray(s.amplitude) &&
-    "phase" in s &&
-    Array.isArray(s.phase) &&
-    "theta" in s &&
-    Array.isArray(s.theta) &&
-    "cosTheta" in s &&
-    Array.isArray(s.cosTheta) &&
-    "sinTheta" in s &&
-    Array.isArray(s.sinTheta)
+    Array.isArray(s) && s.length === 7 && s.every((n) => typeof n === "number")
   );
 }
 
-export function setOptions(s: Partial<Spring>, o: SpringOptions): Spring {
-  const damping = o.damping
-    ? o.damping
-    : o.halflife
-    ? halflifeToDamping(o.halflife)
-    : defaultDamping;
-  const stiffness = o.stiffness
-    ? o.stiffness
-    : o.frequency
-    ? frequencyToStiffness(o.frequency)
-    : dampingRatioToStiffness(o.dampingRatio ?? 1, damping);
-  s.halfDamping = damping / 2;
-  const length =
-    o.start?.length ?? o.end?.length ?? o.startVelocity?.length ?? 1;
-  s.start = o.start ?? zeroes(length);
-  s.end = o.end ?? ones(length);
-  s.startVelocity = o.startVelocity ?? zeroes(length);
-  s.delta = sub([], s.start, s.end);
-  const squareDampedFrequency = Math.max(0, stiffness - square(damping) / 4);
-  s.dampedFrequency = Math.sqrt(squareDampedFrequency);
-  const velocityDelta = maddN([], s.delta, s.halfDamping, s.startVelocity);
-  s.amplitude = mul(
-    null,
-    sign([], s.delta),
-    sqrt(
-      null,
-      add(
-        null,
-        safeDiv(
-          null,
-          powN([], velocityDelta, 2),
-          mulN([], ones(length), squareDampedFrequency)
-        ),
-        powN([], s.delta, 2)
-      )
-    )
-  );
-  s.phase = atan(
-    null,
-    safeDiv([], velocityDelta, mulN(null, neg([], s.delta), s.dampedFrequency))
-  );
-  s.theta = [];
-  s.cosTheta = [];
-  s.sinTheta = [];
-  return s as Spring;
+export function setOptions(
+  s: Spring,
+  {
+    start,
+    end = 1,
+    delta = (start ?? 0) - end,
+    velocity = 0,
+    halflife,
+    frequency,
+    dampingRatio,
+    damping = halflife ? halflifeToDamping(halflife) : defaultDamping,
+    stiffness = frequency
+      ? frequencyToStiffness(frequency)
+      : dampingRatioToStiffness(dampingRatio ?? 1, damping),
+  }: SpringOptions
+): Spring {
+  const v = velocity + delta * (damping / 2);
+  const criticality = Math.sqrt(stiffness - square(damping) / 4);
+  const amplitude =
+    Math.sign(delta) *
+    Math.sqrt(safeDiv(square(v), square(criticality)) + square(delta));
+  const phase = Math.atan(safeDiv(v, -delta * criticality));
+  s[0] = delta;
+  s[1] = end;
+  s[2] = velocity;
+  s[3] = damping;
+  s[4] = criticality;
+  s[5] = amplitude;
+  s[6] = phase;
+  return s;
 }
 
 export function fromOptions(o: SpringOptions): Spring {
-  return setOptions({}, o);
+  return setOptions(new Array(7) as Spring, o);
 }
 
-export function position(a: Vec | null, s: Spring, t: number): Vec {
-  const exp = Math.exp(-s.halfDamping * t);
-  return s.dampedFrequency > 0
-    ? maddN(
-        null,
-        mul(
-          null,
-          cos(null, addN(a, s.phase, s.dampedFrequency * t)),
-          s.amplitude
-        ),
-        exp,
-        s.end
-      )
-    : maddN(
-        null,
-        maddN(
-          null,
-          maddN(a, s.delta, s.halfDamping, s.startVelocity),
-          t,
-          s.delta
-        ),
-        exp,
-        s.end
-      );
+export function positionAt(
+  delta: number,
+  end: number,
+  velocity: number,
+  damping: number,
+  criticality: number,
+  amplitude: number,
+  phase: number,
+  t: number
+) {
+  const d = damping / 2;
+  const exp = Math.exp(-d * t);
+  return delta === 0
+    ? end
+    : criticality > 0
+    ? amplitude * exp * Math.cos(criticality * t + phase) + end
+    : exp * (delta + (velocity + delta * d) * t) + end;
 }
 
-export function positionN(s: Spring, t: number): number {
-  return position(scratchVec, s, t)[0];
-}
-
-export function velocity(a: Vec | null, s: Spring, t: number) {
-  const exp = Math.exp(-s.halfDamping * t);
-  addN(s.theta, s.phase, s.dampedFrequency * t);
-  return s.dampedFrequency > 0
-    ? mul(
-        a,
-        add(
-          null,
-          mulN(null, cos(s.cosTheta, s.theta), -s.halfDamping * exp),
-          mulN(null, sin(s.sinTheta, s.theta), -s.dampedFrequency * exp)
-        ),
-        s.amplitude
-      )
-    : mulN(
-        null,
-        msubN(
-          null,
-          maddN(a, s.delta, s.halfDamping, s.startVelocity),
-          s.halfDamping * t,
-          s.startVelocity
-        ),
-        -exp
-      );
-}
-
-export function velocityN(s: Spring, t: number): number {
-  return velocity(scratchVec, s, t)[0];
+export function velocityAt(
+  delta: number,
+  _end: number,
+  velocity: number,
+  damping: number,
+  criticality: number,
+  amplitude: number,
+  phase: number,
+  t: number
+) {
+  const d = damping / 2;
+  const exp = Math.exp(-d * t);
+  const theta = criticality * t + phase;
+  return criticality > 0
+    ? -d * amplitude * exp * Math.cos(theta) -
+        criticality * amplitude * exp * Math.sin(theta)
+    : exp * (velocity - (velocity + delta * d) * d * t);
 }
 
 export function duration(
-  a: Vec | null,
-  s: Spring,
+  delta: number,
+  _end: number,
+  _velocity: number,
+  damping: number,
+  _criticality: number,
+  amplitude: number,
+  _phase: number,
   epsilon: number = defaultEpsilon
 ) {
-  return divN(
-    null,
-    neg(
-      null,
-      log(
-        null,
-        safeDiv(null, mulN(null, sign(a, s.delta), epsilon), s.amplitude)
-      )
-    ),
-    s.halfDamping
+  return safeDiv(
+    Math.log(Math.sign(-delta) * epsilon),
+    amplitude * (damping / 2)
   );
 }
 
-export function durationN(s: Spring, epsilon: number = defaultEpsilon) {
-  return duration(scratchVec, s, epsilon)[0];
-}
+// const [a] = defHofOp<MultiVecOpVVVVV, VecOpVVVVV>(positionF, FN5, ARGS_VV);

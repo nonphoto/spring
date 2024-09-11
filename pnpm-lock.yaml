@@ -34,6 +34,10 @@ importers:
         version: 2.10.2(solid-js@1.8.21)(vite@5.4.2)
 
   packages/spring:
+    dependencies:
+      '@thi.ng/math':
+        specifier: 5.11.9
+        version: 5.11.9
     devDependencies:
       '@thi.ng/vectors':
         specifier: 7.12.0
