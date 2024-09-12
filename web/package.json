@@ -8,14 +8,16 @@
     "version": "vinxi version"
   },
   "dependencies": {
+    "@kobalte/core": "0.13.6",
     "@nonphoto/css": "1.0.4",
     "@nonphoto/spring": "workspace:*",
     "@solid-primitives/resize-observer": "2.0.26",
     "@solidjs/meta": "^0.29.4",
-    "@solidjs/router": "^0.14.1",
+    "@solidjs/router": "^0.14.3",
     "@solidjs/start": "^1.0.6",
-    "solid-js": "^1.8.18",
-    "vinxi": "^0.4.1"
+    "clsx": "2.1.1",
+    "solid-js": "^1.8.22",
+    "vinxi": "^0.4.2"
   },
   "engines": {
     "node": ">=18"

@@ -5,10 +5,17 @@ import {
   velocityAt,
 } from "@nonphoto/spring/src/index.js";
 import { createWindowSize } from "@solid-primitives/resize-observer";
-import { createEffect } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
+import { Controls, ControlsSlider } from "~/components/Controls";
 
 export default function ExamplesCanvas() {
   const size = createWindowSize();
+  const w = () => size.width * 2;
+  const h = () => size.height * 2;
+
+  const [dampingRatio, setDampingRatio] = createSignal([0.5]);
+  const [halflife, setHalflife] = createSignal([0.5]);
+
   const canvas = (
     <canvas
       style={{
@@ -19,9 +26,6 @@ export default function ExamplesCanvas() {
     />
   ) as HTMLCanvasElement;
 
-  const w = () => size.width * 2;
-  const h = () => size.height * 2;
-
   createEffect(() => {
     canvas.width = w();
     canvas.height = h();
@@ -31,8 +35,8 @@ export default function ExamplesCanvas() {
     const spring = fromOptions({
       start: h(),
       end: h() / 3,
-      halflife: w() * 0.1,
-      dampingRatio: 0.5,
+      halflife: w() * halflife()[0],
+      dampingRatio: dampingRatio()[0],
     });
     console.log(spring);
 
@@ -71,5 +75,27 @@ export default function ExamplesCanvas() {
     context.stroke();
   });
 
-  return canvas;
+  return (
+    <main>
+      <Controls>
+        <ControlsSlider
+          label="Damping Ratio"
+          value={dampingRatio()}
+          onChange={setDampingRatio}
+          minValue={0}
+          maxValue={1}
+          step={0.01}
+        />
+        <ControlsSlider
+          label="Half-life"
+          value={halflife()}
+          onChange={setHalflife}
+          minValue={0}
+          maxValue={1}
+          step={0.01}
+        />
+      </Controls>
+      {canvas}
+    </main>
+  );
 }
