@@ -1,6 +1,6 @@
 import { copysign, HALF_PI, QUARTER_PI, TAU } from "@thi.ng/math";
 
-const QUAD_LN2 = 4 * Math.LN2;
+const TWO_LN2 = 2 * Math.LN2;
 
 function square(x: number): number {
   return x * x;
@@ -18,11 +18,11 @@ export function fastAtan(x: number): number {
 }
 
 export function halflifeToDamping(halflife: number): number {
-  return QUAD_LN2 / halflife;
+  return TWO_LN2 / halflife;
 }
 
 export function dampingToHalflife(damping: number): number {
-  return QUAD_LN2 / damping;
+  return TWO_LN2 / damping;
 }
 
 export function frequencyToStiffness(frequency: number): number {
@@ -34,23 +34,23 @@ export function stiffnessToFrequency(stiffness: number): number {
 }
 
 export function criticalHalflife(frequency: number): number {
-  return dampingToHalflife(Math.sqrt(frequencyToStiffness(frequency) * 4));
+  return dampingToHalflife(Math.sqrt(frequencyToStiffness(frequency)));
 }
 
 export function criticalFrequency(halflife: number): number {
-  return stiffnessToFrequency(square(halflifeToDamping(halflife)) / 4);
+  return stiffnessToFrequency(square(halflifeToDamping(halflife)));
 }
 
 export function dampingRatioToStiffness(
   dampingRatio: number,
   damping: number
 ): number {
-  return square(damping / (dampingRatio * 2));
+  return square(damping / dampingRatio);
 }
 
 export function dampingRatioToDamping(
   dampingRatio: number,
   stiffness: number
 ): number {
-  return dampingRatio * 2 * Math.sqrt(stiffness);
+  return dampingRatio * Math.sqrt(stiffness);
 }

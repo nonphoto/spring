@@ -14,6 +14,7 @@ export default function () {
       style={{
         width: "100svw",
         height: "100svh",
+        display: "block",
       }}
     />
   ) as HTMLCanvasElement;

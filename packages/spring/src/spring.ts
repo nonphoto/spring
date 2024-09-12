@@ -1,4 +1,4 @@
-import { safeDiv } from "@thi.ng/math";
+import { copysign, safeDiv } from "@thi.ng/math";
 import {
   dampingRatioToStiffness,
   frequencyToStiffness,
@@ -17,10 +17,10 @@ export type Spring = [
   delta: number,
   end: number,
   velocity: number,
+  damping: number,
+  criticality: number,
   amplitude: number,
-  phase: number,
-  halfDamping: number,
-  criticality: number
+  phase: number
 ];
 
 export interface SpringOptions {
@@ -57,8 +57,8 @@ export function setOptions(
       : dampingRatioToStiffness(dampingRatio ?? 1, damping),
   }: SpringOptions
 ): Spring {
-  const v = velocity + delta * (damping / 2);
-  const criticality = Math.sqrt(stiffness - square(damping) / 4);
+  const v = velocity + delta * damping;
+  const criticality = Math.sqrt(stiffness - square(damping));
   const amplitude =
     Math.sign(delta) *
     Math.sqrt(safeDiv(square(v), square(criticality)) + square(delta));
@@ -87,13 +87,12 @@ export function positionAt(
   phase: number,
   t: number
 ) {
-  const d = damping / 2;
-  const exp = Math.exp(-d * t);
+  const exp = Math.exp(-damping * t);
   return delta === 0
     ? end
     : criticality > 0
     ? amplitude * exp * Math.cos(criticality * t + phase) + end
-    : exp * (delta + (velocity + delta * d) * t) + end;
+    : exp * (delta + (velocity + delta * damping) * t) + end;
 }
 
 export function velocityAt(
@@ -106,13 +105,12 @@ export function velocityAt(
   phase: number,
   t: number
 ) {
-  const d = damping / 2;
-  const exp = Math.exp(-d * t);
+  const exp = Math.exp(-damping * t);
   const theta = criticality * t + phase;
   return criticality > 0
-    ? -d * amplitude * exp * Math.cos(theta) -
+    ? -damping * amplitude * exp * Math.cos(theta) -
         criticality * amplitude * exp * Math.sin(theta)
-    : exp * (velocity - (velocity + delta * d) * d * t);
+    : exp * (velocity - (velocity + delta * damping) * damping * t);
 }
 
 export function duration(
@@ -125,10 +123,7 @@ export function duration(
   _phase: number,
   epsilon: number = defaultEpsilon
 ) {
-  return safeDiv(
-    Math.log(Math.sign(-delta) * epsilon),
-    amplitude * (damping / 2)
-  );
+  return safeDiv(Math.log(copysign(epsilon, delta)), amplitude * damping);
 }
 
 // const [a] = defHofOp<MultiVecOpVVVVV, VecOpVVVVV>(positionF, FN5, ARGS_VV);
