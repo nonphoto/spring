@@ -3,11 +3,11 @@ import {
   fromOptions,
   positionAt,
   velocityAt,
-} from "@nonphoto/spring/src/index";
+} from "@nonphoto/spring/src/index.js";
 import { createWindowSize } from "@solid-primitives/resize-observer";
 import { createEffect } from "solid-js";
 
-export default function () {
+export default function ExamplesCanvas() {
   const size = createWindowSize();
   const canvas = (
     <canvas
