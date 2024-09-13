@@ -4,6 +4,9 @@
     "node": ">=20",
     "pnpm": ">=9"
   },
+  "scripts": {
+    "release": "semantic-release -e semantic-release-monorepo"
+  },
   "devDependencies": {
     "semantic-release": "24.1.0",
     "semantic-release-monorepo": "8.0.2"
