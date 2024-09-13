@@ -14,7 +14,7 @@ export default function ExamplesCanvas() {
   const h = () => size.height * 2;
 
   const [dampingRatio, setDampingRatio] = createSignal([0.5]);
-  const [halflife, setHalflife] = createSignal([0.5]);
+  const [halflife, setHalflife] = createSignal([0.25]);
 
   const canvas = (
     <canvas
@@ -35,10 +35,9 @@ export default function ExamplesCanvas() {
     const spring = fromOptions({
       start: h(),
       end: h() / 3,
-      halflife: w() * halflife()[0],
+      halflife: (w() / 2) * halflife()[0],
       dampingRatio: dampingRatio()[0],
     });
-    console.log(spring);
 
     const context = canvas.getContext("2d")!;
     context.lineWidth = 4;
@@ -84,7 +83,7 @@ export default function ExamplesCanvas() {
           onChange={setDampingRatio}
           minValue={0}
           maxValue={1}
-          step={0.01}
+          step={0.001}
         />
         <ControlsSlider
           label="Half-life"
@@ -92,7 +91,7 @@ export default function ExamplesCanvas() {
           onChange={setHalflife}
           minValue={0}
           maxValue={1}
-          step={0.01}
+          step={0.001}
         />
       </Controls>
       {canvas}

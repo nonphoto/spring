@@ -1,4 +1,4 @@
-import { copysign, safeDiv } from "@thi.ng/math";
+import { copysign } from "@thi.ng/math";
 import {
   dampingRatioToStiffness,
   frequencyToStiffness,
@@ -51,8 +51,8 @@ export function setOptions(
     halflife,
     frequency,
     dampingRatio,
-    damping = halflife ? halflifeToDamping(halflife) : defaultDamping,
-    stiffness = frequency
+    damping = halflife != null ? halflifeToDamping(halflife) : defaultDamping,
+    stiffness = frequency != null
       ? frequencyToStiffness(frequency)
       : dampingRatioToStiffness(dampingRatio ?? 1, damping),
   }: SpringOptions
@@ -61,8 +61,8 @@ export function setOptions(
   const criticality = Math.sqrt(stiffness - square(damping));
   const amplitude =
     Math.sign(delta) *
-    Math.sqrt(safeDiv(square(v), square(criticality)) + square(delta));
-  const phase = Math.atan(safeDiv(v, -delta * criticality));
+    Math.sqrt(square(v) / square(criticality) + square(delta));
+  const phase = Math.atan(v / (-delta * criticality));
   s[0] = delta;
   s[1] = end;
   s[2] = velocity;
@@ -123,7 +123,9 @@ export function duration(
   _phase: number,
   epsilon: number = defaultEpsilon
 ) {
-  return safeDiv(Math.log(copysign(epsilon, delta)), amplitude * damping);
+  return (
+    -Math.log(Math.max(1e-4, copysign(epsilon, delta) / amplitude)) / damping
+  );
 }
 
 // const [a] = defHofOp<MultiVecOpVVVVV, VecOpVVVVV>(positionF, FN5, ARGS_VV);
