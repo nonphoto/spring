@@ -5,9 +5,18 @@ import {
   halflifeToDamping,
 } from "./math.js";
 
+export const defaultStart = 0;
+export const defaultEnd = 1;
+export const defaultDelta = -1;
+export const defaultVelocity = 0;
 export const defaultEpsilon = 0.01;
-export const defaultDamping = halflifeToDamping(1000);
-export const defaultStiffness = dampingRatioToStiffness(1, defaultDamping);
+export const defaultHalflife = 1000;
+export const defaultDamping = halflifeToDamping(defaultHalflife);
+export const defaultDampingRatio = 1;
+export const defaultStiffness = dampingRatioToStiffness(
+  defaultDampingRatio,
+  defaultDamping
+);
 
 function square(x: number): number {
   return x * x;
@@ -23,16 +32,22 @@ export type Spring = [
   phase: number
 ];
 
-export interface SpringOptions {
-  start?: number;
-  end?: number;
-  delta?: number;
-  velocity?: number;
+export interface ScalarSpringOptions {
   damping?: number;
   stiffness?: number;
   halflife?: number;
   frequency?: number;
   dampingRatio?: number;
+  criticality?: number;
+}
+
+export interface SpringOptions extends ScalarSpringOptions {
+  start?: number;
+  end?: number;
+  delta?: number;
+  velocity?: number;
+  amplitude?: number;
+  phase?: number;
 }
 
 export function isSpring(s: any): s is Spring {
@@ -41,35 +56,105 @@ export function isSpring(s: any): s is Spring {
   );
 }
 
-export function setOptions(
-  s: Spring,
-  {
-    start,
-    end = 1,
-    delta = (start ?? 0) - end,
-    velocity = 0,
-    halflife,
+export function deltaFrom(start?: number, end?: number, delta?: number) {
+  return delta ?? (start ?? defaultStart) - (end ?? defaultEnd);
+}
+
+export function deltaFromOptions({ start, end, delta }: SpringOptions): number {
+  return deltaFrom(start, end, delta);
+}
+
+export function endFrom(start?: number, end?: number, delta?: number) {
+  return end ?? (start ?? defaultStart) - (delta ?? defaultDelta);
+}
+
+export function endFromOptions({ start, end, delta }: SpringOptions): number {
+  return endFrom(start, end, delta);
+}
+
+export function dampingFrom(damping?: number, halflife?: number) {
+  return (
+    damping ?? (halflife != null ? halflifeToDamping(halflife) : defaultDamping)
+  );
+}
+
+export function dampingFromOptions({
+  damping,
+  halflife,
+}: ScalarSpringOptions): number {
+  return dampingFrom(damping, halflife);
+}
+
+export function criticalityFrom(
+  criticality?: number,
+  frequency?: number,
+  stiffness?: number,
+  dampingRatio?: number,
+  damping?: number,
+  halflife?: number
+) {
+  damping = dampingFrom(damping, halflife);
+  return (
+    criticality ??
+    Math.sqrt(
+      (stiffness ??
+        (frequency != null
+          ? frequencyToStiffness(frequency)
+          : dampingRatioToStiffness(dampingRatio ?? 1, damping))) -
+        square(damping)
+    )
+  );
+}
+
+export function criticalityFromOptions({
+  criticality,
+  frequency,
+  stiffness,
+  dampingRatio,
+  damping,
+  halflife,
+}: ScalarSpringOptions): number {
+  return criticalityFrom(
+    criticality,
     frequency,
+    stiffness,
     dampingRatio,
-    damping = halflife != null ? halflifeToDamping(halflife) : defaultDamping,
-    stiffness = frequency != null
-      ? frequencyToStiffness(frequency)
-      : dampingRatioToStiffness(dampingRatio ?? 1, damping),
-  }: SpringOptions
-): Spring {
-  const v = velocity + delta * damping;
-  const criticality = Math.sqrt(stiffness - square(damping));
-  const amplitude =
+    damping,
+    halflife
+  );
+}
+
+export function amplitudeFrom(
+  delta: number,
+  velocity: number,
+  damping: number,
+  criticality: number
+): number {
+  return (
     Math.sign(delta) *
-    Math.sqrt(square(v) / square(criticality) + square(delta));
-  const phase = Math.atan(v / (-delta * criticality));
-  s[0] = delta;
-  s[1] = end;
-  s[2] = velocity;
-  s[3] = damping;
-  s[4] = criticality;
-  s[5] = amplitude;
-  s[6] = phase;
+    Math.sqrt(
+      square(velocity + delta * damping) / square(criticality) + square(delta)
+    )
+  );
+}
+
+export function phaseFrom(
+  delta: number,
+  velocity: number,
+  damping: number,
+  criticality: number
+): number {
+  return Math.atan((velocity + delta * damping) / (-delta * criticality));
+}
+
+export function setOptions(s: Spring, o: SpringOptions): Spring {
+  s[0] = deltaFromOptions(o);
+  s[1] = endFromOptions(o);
+  s[2] = o.velocity ?? 0;
+  s[3] = dampingFromOptions(o);
+  s[4] = criticalityFromOptions(o);
+  s[5] = amplitudeFrom(s[0], s[2], s[3], s[4]);
+  s[6] = phaseFrom(s[0], s[2], s[3], s[4]);
   return s;
 }
 
@@ -127,5 +212,3 @@ export function duration(
     -Math.log(Math.max(1e-4, copysign(epsilon, delta) / amplitude)) / damping
   );
 }
-
-// const [a] = defHofOp<MultiVecOpVVVVV, VecOpVVVVV>(positionF, FN5, ARGS_VV);
