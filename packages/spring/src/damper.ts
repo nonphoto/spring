@@ -1,5 +1,5 @@
 import { mix } from "@thi.ng/math";
-import { fastNegExp } from "./math.js";
+import { fastNegExp } from "./common.js";
 
 export function damper(
   start: number,

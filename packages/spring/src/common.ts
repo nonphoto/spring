@@ -1,6 +1,13 @@
-import { copysign, HALF_PI, QUARTER_PI, TAU } from "@thi.ng/math";
+import { copysign, HALF_PI, QUARTER_PI, safeDiv, TAU } from "@thi.ng/math";
 
 const TWO_LN2 = 2 * Math.LN2;
+
+export const defaultPosition = 0;
+export const defaultVelocity = 0;
+export const defaultTarget = 1;
+export const defaultDamping = halflifeToDamping(200);
+export const defaultCriticality = 0;
+export const defaultEpsilon = 0.01;
 
 function square(x: number): number {
   return x * x;
@@ -53,4 +60,49 @@ export function dampingRatioToDamping(
   stiffness: number
 ): number {
   return dampingRatio * Math.sqrt(stiffness);
+}
+
+export function dampingRatioToCriticality(
+  dampingRatio: number,
+  damping: number
+) {
+  return stiffnessToCriticality(
+    dampingRatioToStiffness(dampingRatio, damping),
+    damping
+  );
+}
+
+export function stiffnessToCriticality(stiffness: number, damping: number) {
+  return Math.sqrt(stiffness - square(damping));
+}
+
+export function deltaFromPosition(position: number, target: number) {
+  return position - target;
+}
+
+export function amplitudeFromValues(
+  position: number,
+  velocity: number,
+  target: number,
+  damping: number,
+  criticality: number
+): number {
+  const delta = deltaFromPosition(position, target);
+  return (
+    Math.sign(delta) *
+    Math.sqrt(
+      square(velocity + delta * damping) / square(criticality) + square(delta)
+    )
+  );
+}
+
+export function phaseFromValues(
+  position: number,
+  velocity: number,
+  target: number,
+  damping: number,
+  criticality: number
+): number {
+  const delta = deltaFromPosition(position, target);
+  return Math.atan(safeDiv(velocity + delta * damping, -delta * criticality));
 }

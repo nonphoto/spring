@@ -1,6 +1,8 @@
 import {
+  dampingRatioToCriticality,
   duration,
-  fromOptions,
+  fromValues,
+  halflifeToDamping,
   positionAt,
   velocityAt,
 } from "@nonphoto/spring/src/index.js";
@@ -32,24 +34,21 @@ export default function ExamplesCanvas() {
 
     const step = 2;
 
-    const spring = fromOptions({
-      start: h(),
-      end: h() / 3,
-      halflife: (w() / 2) * halflife()[0],
-      dampingRatio: dampingRatio()[0],
-    });
+    const damping = halflifeToDamping((w() / 2) * halflife()[0]);
+    const criticality = dampingRatioToCriticality(dampingRatio()[0], damping);
+    const spring = fromValues(h(), 0, h() / 3, damping, criticality);
 
     const context = canvas.getContext("2d")!;
     context.lineWidth = 4;
 
     context.beginPath();
-    context.moveTo(0, spring[1]);
-    context.lineTo(w(), spring[1]);
+    context.moveTo(0, spring[2]);
+    context.lineTo(w(), spring[2]);
     context.strokeStyle = "lightgray";
     context.stroke();
 
     context.beginPath();
-    context.moveTo(0, spring[0] + spring[1]);
+    context.moveTo(0, spring[0] + spring[2]);
     for (let x = 0; x < w(); x += step) {
       const y = positionAt(...spring, x);
       context.lineTo(x, y);
@@ -58,10 +57,10 @@ export default function ExamplesCanvas() {
     context.stroke();
 
     context.beginPath();
-    context.moveTo(0, spring[1]);
+    context.moveTo(0, spring[2]);
     for (let x = 0; x < w(); x += step) {
       const y = velocityAt(...spring, x);
-      context.lineTo(x, spring[1] + y * 100);
+      context.lineTo(x, spring[2] + y * 100);
     }
     context.strokeStyle = "orange";
     context.stroke();
