@@ -21,7 +21,7 @@
   "scripts": {
     "prepare": "pnpm build",
     "build": "tsup ./src/index.ts --dts --format esm --clean",
-    "release": "semantic-release -e semantic-release-monorepo",
+    "release": "semantic-release",
     "dev": "vinxi dev"
   },
   "keywords": [
