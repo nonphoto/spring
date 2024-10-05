@@ -16,6 +16,10 @@
     },
     "./src/*": "./src/*"
   },
+  "files": [
+    "./dist/*",
+    "./src/*"
+  ],
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
