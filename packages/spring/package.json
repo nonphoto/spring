@@ -28,7 +28,7 @@
     "physics",
     "animation"
   ],
-  "author": "Jonas Luebbers",
+  "author": "Jonas Luebbers <jonas@jonasluebbers.com> (https://www.jonasluebbers.com)",
   "license": "MIT",
   "devDependencies": {
     "tsup": "8.2.4",
