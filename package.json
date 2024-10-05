@@ -1,14 +1,54 @@
 {
-  "name": "@nonphoto/spring-monorepo",
+  "name": "@nonphoto/spring",
+  "version": "0.0.0",
+  "description": "Low-level spring physics toolbox",
+  "type": "module",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./src/*": "./src/*"
+  },
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "prepare": "pnpm build",
+    "build": "tsup ./src/index.ts --dts --format esm --clean",
+    "release": "semantic-release -e semantic-release-monorepo",
+    "dev": "vinxi dev"
+  },
+  "keywords": [
+    "spring",
+    "physics",
+    "animation"
+  ],
+  "author": "Jonas Luebbers <jonas@jonasluebbers.com> (https://www.jonasluebbers.com)",
+  "license": "MIT",
+  "devDependencies": {
+    "@kobalte/core": "0.13.6",
+    "@nonphoto/css": "1.0.4",
+    "@solid-primitives/resize-observer": "2.0.26",
+    "@solidjs/router": "^0.14.7",
+    "@solidjs/start": "^1.0.8",
+    "clsx": "2.1.1",
+    "semantic-release": "24.1.2",
+    "solid-js": "^1.9.1",
+    "tsup": "8.2.4",
+    "typescript": "5.5.4",
+    "vinxi": "^0.4.3"
+  },
   "engines": {
     "node": ">=20",
     "pnpm": ">=9"
   },
-  "scripts": {
-    "release": "pnpm -r --workspace-concurrency=1 release"
-  },
-  "devDependencies": {
-    "semantic-release": "24.1.2",
-    "semantic-release-monorepo": "8.0.2"
+  "dependencies": {
+    "@thi.ng/math": "5.11.9"
   }
 }

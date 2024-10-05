@@ -1,3 +1,5 @@
+import { createWindowSize } from "@solid-primitives/resize-observer";
+import { createEffect, createSignal } from "solid-js";
 import {
   dampingRatioToCriticality,
   duration,
@@ -5,9 +7,7 @@ import {
   halflifeToDamping,
   positionAt,
   velocityAt,
-} from "@nonphoto/spring/src/index.js";
-import { createWindowSize } from "@solid-primitives/resize-observer";
-import { createEffect, createSignal } from "solid-js";
+} from "~/../src";
 import { Controls, ControlsSlider } from "~/components/Controls";
 
 export default function ExamplesCanvas() {

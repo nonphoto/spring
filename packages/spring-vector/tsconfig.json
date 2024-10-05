@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "strict": true,
-    "isolatedModules": true,
-    "lib": ["ESNext"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext"
-  }
-}
