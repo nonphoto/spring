@@ -5,7 +5,7 @@
     "pnpm": ">=9"
   },
   "scripts": {
-    "release": "semantic-release -e semantic-release-monorepo"
+    "release": "pnpm -r --workspace-concurrency=1 release"
   },
   "devDependencies": {
     "semantic-release": "24.1.2",
