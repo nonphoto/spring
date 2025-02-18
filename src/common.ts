@@ -91,7 +91,8 @@ export function amplitudeFromValues(
   return (
     Math.sign(delta) *
     Math.sqrt(
-      square(velocity + delta * damping) / square(criticality) + square(delta)
+      safeDiv(square(velocity + delta * damping), square(criticality)) +
+        square(delta)
     )
   );
 }
