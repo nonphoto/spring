@@ -34,7 +34,7 @@ jobs:
           node-version: "lts/*"
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --prod
       - name: Verify provenance for dependencies
         run: pnpm audit signatures
       - name: Release
