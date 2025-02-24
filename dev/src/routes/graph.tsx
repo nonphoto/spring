@@ -7,10 +7,10 @@ import {
   halflifeToDamping,
   positionAt,
   velocityAt,
-} from "~/../src";
+} from "~/../../src";
 import { Controls, ControlsSlider } from "~/components/Controls";
 
-export default function ExamplesCanvas() {
+export default function GraphRoute() {
   const size = createWindowSize();
   const w = () => size.width * 2;
   const h = () => size.height * 2;
