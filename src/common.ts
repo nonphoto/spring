@@ -1,4 +1,4 @@
-import { copysign, HALF_PI, QUARTER_PI, safeDiv, TAU } from "@thi.ng/math";
+import { copysign, HALF_PI, QUARTER_PI, TAU } from "@thi.ng/math";
 
 const TWO_LN2 = 2 * Math.LN2;
 
@@ -8,6 +8,11 @@ export const defaultTarget = 1;
 export const defaultDamping = halflifeToDamping(200);
 export const defaultCriticality = 0;
 export const defaultEpsilon = 0.01;
+
+function safeDiv(a: number, b: number): number {
+  const c = a / b;
+  return isNaN(c) ? 0 : c;
+}
 
 function square(x: number): number {
   return x * x;
