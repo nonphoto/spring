@@ -1,4 +1,4 @@
-import { copysign } from "@thi.ng/math";
+import { copysign, safeDiv } from "@thi.ng/math";
 import {
   amplitudeFromValues,
   defaultCriticality,
@@ -113,7 +113,8 @@ export function duration(
   epsilon: number = defaultEpsilon
 ) {
   const delta = deltaFromPosition(position, target);
-  return (
-    -Math.log(Math.max(1e-4, copysign(epsilon, delta) / amplitude)) / damping
+  return safeDiv(
+    -Math.log(Math.max(1e-4, safeDiv(copysign(epsilon, delta), amplitude))),
+    damping
   );
 }
