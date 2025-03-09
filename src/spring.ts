@@ -1,4 +1,4 @@
-import { copysign, safeDiv } from "@thi.ng/math";
+import { safeDiv } from "@thi.ng/math";
 import {
   amplitudeFromValues,
   defaultCriticality,
@@ -103,18 +103,19 @@ export function velocityAt(
 }
 
 export function duration(
-  position: number,
+  _position: number,
   _velocity: number,
-  target: number,
+  _target: number,
   damping: number,
   _criticality: number,
   amplitude: number,
   _phase: number,
   epsilon: number = defaultEpsilon
 ) {
-  const delta = deltaFromPosition(position, target);
-  return safeDiv(
-    -Math.log(Math.max(1e-4, safeDiv(copysign(epsilon, delta), amplitude))),
-    damping
+  return Math.abs(
+    safeDiv(
+      -Math.log(safeDiv(epsilon, Math.max(Math.abs(amplitude), epsilon))),
+      damping
+    )
   );
 }
