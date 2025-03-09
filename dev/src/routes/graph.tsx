@@ -17,6 +17,7 @@ export default function GraphRoute() {
 
   const [dampingRatio, setDampingRatio] = createSignal([0.5]);
   const [halflife, setHalflife] = createSignal([0.25]);
+  const [target, setTarget] = createSignal([0.5]);
 
   const canvas = (
     <canvas
@@ -36,7 +37,13 @@ export default function GraphRoute() {
 
     const damping = halflifeToDamping((w() / 2) * halflife()[0]);
     const criticality = dampingRatioToCriticality(dampingRatio()[0], damping);
-    const spring = fromValues(h(), 0, h() / 3, damping, criticality);
+    const spring = fromValues(
+      h() * 0.5,
+      0,
+      h() * target()[0],
+      damping,
+      criticality
+    );
 
     const context = canvas.getContext("2d")!;
     context.lineWidth = 4;
@@ -48,7 +55,7 @@ export default function GraphRoute() {
     context.stroke();
 
     context.beginPath();
-    context.moveTo(0, spring[0] + spring[2]);
+    context.moveTo(0, positionAt(...spring, 0));
     for (let x = 0; x < w(); x += step) {
       const y = positionAt(...spring, x);
       context.lineTo(x, y);
@@ -76,6 +83,14 @@ export default function GraphRoute() {
   return (
     <main>
       <Controls>
+        <ControlsSlider
+          label="Target"
+          value={target()}
+          onChange={setTarget}
+          minValue={0}
+          maxValue={1}
+          step={0.001}
+        />
         <ControlsSlider
           label="Damping Ratio"
           value={dampingRatio()}
