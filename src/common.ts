@@ -1,114 +1,122 @@
-import { copysign, HALF_PI, QUARTER_PI, TAU } from "@thi.ng/math";
-
 const TWO_LN2 = 2 * Math.LN2;
-
-export const defaultPosition = 0;
-export const defaultVelocity = 0;
-export const defaultTarget = 1;
-export const defaultDamping = halflifeToDamping(200);
-export const defaultCriticality = 0;
-export const defaultEpsilon = 0.01;
 
 function safeDiv(a: number, b: number): number {
   const c = a / b;
   return isNaN(c) ? 0 : c;
 }
 
-function square(x: number): number {
+export function square(x: number): number {
   return x * x;
 }
 
-export function fastNegExp(x: number): number {
-  return 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
-}
-
-export function fastAtan(x: number): number {
-  const z = Math.abs(x);
-  const w = z > 1 ? 1 / z : z;
-  const y = QUARTER_PI * w - w * (w - 1) * (0.2447 + 0.0663 * w);
-  return copysign(z > 1 ? HALF_PI - y : y, x);
-}
-
-export function halflifeToDamping(halflife: number): number {
+export function dampingFromHalflife(halflife: number): number {
   return TWO_LN2 / halflife;
 }
 
-export function dampingToHalflife(damping: number): number {
+export function halflifeFromDamping(damping: number): number {
   return TWO_LN2 / damping;
 }
 
-export function frequencyToStiffness(frequency: number): number {
-  return square(TAU * frequency);
-}
-
-export function stiffnessToFrequency(stiffness: number): number {
-  return Math.sqrt(stiffness) / TAU;
-}
-
-export function criticalHalflife(frequency: number): number {
-  return dampingToHalflife(Math.sqrt(frequencyToStiffness(frequency)));
-}
-
-export function criticalFrequency(halflife: number): number {
-  return stiffnessToFrequency(square(halflifeToDamping(halflife)));
-}
-
-export function dampingRatioToStiffness(
+export function stiffnessFromDamping(
   dampingRatio: number,
   damping: number
 ): number {
   return square(damping / dampingRatio);
 }
 
-export function dampingRatioToDamping(
+export function dampingFromStiffness(
   dampingRatio: number,
   stiffness: number
 ): number {
   return dampingRatio * Math.sqrt(stiffness);
 }
 
-export function dampingRatioToCriticality(
-  dampingRatio: number,
-  damping: number
-) {
-  return stiffnessToCriticality(
-    dampingRatioToStiffness(dampingRatio, damping),
-    damping
-  );
-}
-
-export function stiffnessToCriticality(stiffness: number, damping: number) {
-  return Math.sqrt(stiffness - square(damping));
-}
-
-export function deltaFromPosition(position: number, target: number) {
+export function delta(position: number, target: number) {
   return position - target;
 }
 
-export function amplitudeFromValues(
+export function criticality(stiffness: number, damping: number) {
+  return Math.sqrt(stiffness - square(damping));
+}
+
+export function criticalityFromDamping(dampingRatio: number, damping: number) {
+  return criticality(stiffnessFromDamping(dampingRatio, damping), damping);
+}
+
+export function amplitude(
   position: number,
-  velocity: number,
   target: number,
+  velocity: number,
   damping: number,
   criticality: number
 ): number {
-  const delta = deltaFromPosition(position, target);
+  const d = delta(position, target);
   return (
-    Math.sign(delta) *
+    Math.sign(d) *
     Math.sqrt(
-      safeDiv(square(velocity + delta * damping), square(criticality)) +
-        square(delta)
+      safeDiv(square(velocity + d * damping), square(criticality)) + square(d)
     )
   );
 }
 
-export function phaseFromValues(
+export function phase(
   position: number,
-  velocity: number,
   target: number,
+  velocity: number,
   damping: number,
   criticality: number
 ): number {
-  const delta = deltaFromPosition(position, target);
-  return Math.atan(safeDiv(velocity + delta * damping, -delta * criticality));
+  const d = delta(position, target);
+  return Math.atan(safeDiv(velocity + d * damping, -d * criticality));
+}
+
+export function positionAt(
+  position: number,
+  target: number,
+  velocity: number,
+  damping: number,
+  criticality: number,
+  amplitude: number,
+  phase: number,
+  t: number
+) {
+  const d = delta(position, target);
+  const exp = Math.exp(-damping * t);
+  return d === 0
+    ? target
+    : criticality > 0
+    ? amplitude * exp * Math.cos(criticality * t + phase) + target
+    : exp * (d + (velocity + d * damping) * t) + target;
+}
+
+export function velocityAt(
+  position: number,
+  target: number,
+  velocity: number,
+  damping: number,
+  criticality: number,
+  amplitude: number,
+  phase: number,
+  t: number
+) {
+  const d = delta(position, target);
+  const exp = Math.exp(-damping * t);
+  const theta = criticality * t + phase;
+  return criticality > 0
+    ? -damping * amplitude * exp * Math.cos(theta) -
+        criticality * amplitude * exp * Math.sin(theta)
+    : exp * (velocity - (velocity + d * damping) * damping * t);
+}
+
+export function duration(
+  damping: number,
+  amplitude: number,
+  epsilon: number = 1
+) {
+  return Math.abs(
+    safeDiv(
+      -Math.log(safeDiv(epsilon, Math.max(Math.abs(amplitude), epsilon))),
+      damping
+    )
+  );
 }

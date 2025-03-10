@@ -1,121 +1,98 @@
-import { safeDiv } from "@thi.ng/math";
+import { LRUCache } from "@thi.ng/cache";
+import { memoize } from "@thi.ng/memoize";
 import {
-  amplitudeFromValues,
-  defaultCriticality,
-  defaultDamping,
-  defaultEpsilon,
-  defaultPosition,
-  defaultTarget,
-  defaultVelocity,
-  deltaFromPosition,
-  phaseFromValues,
-} from "./common.js";
+  amplitude,
+  criticality,
+  duration,
+  phase,
+  positionAt,
+  velocityAt,
+} from "./common";
 
-export type Spring = [
-  position: number,
-  velocity: number,
-  target: number,
-  damping: number,
-  criticality: number,
-  amplitude: number,
-  phase: number
-];
-
-export function setValues(
-  s: Spring,
-  position?: number,
-  velocity?: number,
-  target?: number,
-  damping?: number,
-  criticality?: number
-): Spring {
-  s[0] = position ?? s[0];
-  s[1] = velocity ?? s[1];
-  s[2] = target ?? s[2];
-  s[3] = damping ?? s[3];
-  s[4] = criticality ?? s[4];
-  s[5] = amplitudeFromValues(s[0], s[1], s[2], s[3], s[4]);
-  s[6] = phaseFromValues(s[0], s[1], s[2], s[3], s[4]);
-  return s;
+interface SpringLike {
+  position: number;
+  velocity: number;
+  target: number;
+  damping: number;
+  stiffness: number;
 }
 
-export function fromValues(
-  position?: number,
-  velocity?: number,
-  target?: number,
-  damping?: number,
-  criticality?: number
-): Spring {
-  return setValues(
-    [
-      defaultPosition,
-      defaultVelocity,
-      defaultTarget,
-      defaultDamping,
-      defaultCriticality,
-      0,
-      0,
-    ],
-    position,
-    velocity,
-    target,
-    damping,
-    criticality
+export class Spring implements SpringLike {
+  position: number;
+  velocity: number;
+  target: number;
+  damping: number;
+  stiffness: number;
+
+  constructor(options?: Partial<SpringLike>) {
+    this.position = options?.position ?? 0;
+    this.velocity = options?.velocity ?? 0;
+    this.target = options?.target ?? 0;
+    this.damping = options?.damping ?? 0;
+    this.stiffness = options?.stiffness ?? 0;
+    console.log(criticality(this.stiffness, this.damping));
+  }
+
+  #criticality = memoize(criticality, new LRUCache(null, { maxlen: 1 }));
+  #amplitude = memoize(amplitude, new LRUCache(null, { maxlen: 1 }));
+  #phase = memoize(
+    phase,
+    new LRUCache(null, {
+      maxlen: 1,
+    })
   );
-}
 
-export function positionAt(
-  position: number,
-  velocity: number,
-  target: number,
-  damping: number,
-  criticality: number,
-  amplitude: number,
-  phase: number,
-  t: number
-) {
-  const delta = deltaFromPosition(position, target);
-  const exp = Math.exp(-damping * t);
-  return delta === 0
-    ? target
-    : criticality > 0
-    ? amplitude * exp * Math.cos(criticality * t + phase) + target
-    : exp * (delta + (velocity + delta * damping) * t) + target;
-}
+  criticality() {
+    return this.#criticality(this.stiffness, this.damping);
+  }
 
-export function velocityAt(
-  position: number,
-  velocity: number,
-  target: number,
-  damping: number,
-  criticality: number,
-  amplitude: number,
-  phase: number,
-  t: number
-) {
-  const delta = deltaFromPosition(position, target);
-  const exp = Math.exp(-damping * t);
-  const theta = criticality * t + phase;
-  return criticality > 0
-    ? -damping * amplitude * exp * Math.cos(theta) -
-        criticality * amplitude * exp * Math.sin(theta)
-    : exp * (velocity - (velocity + delta * damping) * damping * t);
-}
+  amplitude() {
+    return this.#amplitude(
+      this.position,
+      this.target,
+      this.velocity,
+      this.damping,
+      this.criticality()
+    );
+  }
 
-export function duration(
-  _position: number,
-  _velocity: number,
-  _target: number,
-  damping: number,
-  _criticality: number,
-  amplitude: number,
-  _phase: number,
-  epsilon: number = defaultEpsilon
-) {
-  return Math.abs(
-    safeDiv(
-      -Math.log(safeDiv(epsilon, Math.max(Math.abs(amplitude), epsilon))),
-      damping
-    )
-  );
+  phase() {
+    return this.#phase(
+      this.position,
+      this.target,
+      this.velocity,
+      this.damping,
+      this.criticality()
+    );
+  }
+
+  positionAt(t: number) {
+    return positionAt(
+      this.position,
+      this.target,
+      this.velocity,
+      this.damping,
+      this.criticality(),
+      this.amplitude(),
+      this.phase(),
+      t
+    );
+  }
+
+  velocityAt(t: number) {
+    return velocityAt(
+      this.position,
+      this.target,
+      this.velocity,
+      this.damping,
+      this.criticality(),
+      this.amplitude(),
+      this.phase(),
+      t
+    );
+  }
+
+  duration(epsilon?: number) {
+    return duration(this.damping, this.amplitude(), epsilon);
+  }
 }
