@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@thi.ng/math':
-        specifier: 5.11.21
-        version: 5.11.21
     devDependencies:
       semantic-release:
         specifier: 24.2.3
@@ -420,14 +416,6 @@ packages:
 
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
-    engines: {node: '>=18'}
-
-  '@thi.ng/api@8.11.21':
-    resolution: {integrity: sha512-J6BUdUtFtwZirL3M9tkCiqBXj228z7zkxWOaDWTymwBeqY9s02vJP3mQV8l5p+YPDIRmYx/q7XVuLW1UTJRN/A==}
-    engines: {node: '>=18'}
-
-  '@thi.ng/math@5.11.21':
-    resolution: {integrity: sha512-JLjHdQbCpIP6F76Vq8yBtRtDOaUJ5HKsyEhU++8bjPX7VeDf8um4Ba/PUQZS+SpX0ghTZrqirqoI7H6wWz/TaQ==}
     engines: {node: '>=18'}
 
   '@types/estree@1.0.6':
@@ -2000,12 +1988,6 @@ snapshots:
   '@sindresorhus/merge-streams@2.3.0': {}
 
   '@sindresorhus/merge-streams@4.0.0': {}
-
-  '@thi.ng/api@8.11.21': {}
-
-  '@thi.ng/math@5.11.21':
-    dependencies:
-      '@thi.ng/api': 8.11.21
 
   '@types/estree@1.0.6': {}
 

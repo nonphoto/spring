@@ -1,13 +1,6 @@
 import { createWindowSize } from "@solid-primitives/resize-observer";
 import { createEffect, createSignal } from "solid-js";
-import {
-  dampingRatioToCriticality,
-  duration,
-  fromValues,
-  halflifeToDamping,
-  positionAt,
-  velocityAt,
-} from "~/../../src";
+import { duration, positionAt, velocityAt } from "~/../../src";
 import { Controls, ControlsSlider } from "~/components/Controls";
 
 export default function GraphRoute() {
@@ -15,9 +8,9 @@ export default function GraphRoute() {
   const w = () => size.width * 2;
   const h = () => size.height * 2;
 
-  const [dampingRatio, setDampingRatio] = createSignal([0.5]);
-  const [halflife, setHalflife] = createSignal([0.25]);
-  const [target, setTarget] = createSignal([0.5]);
+  const [stiffness, setStiffness] = createSignal([0.005]);
+  const [damping, setDamping] = createSignal([0.005]);
+  const [target, setTarget] = createSignal([0.75]);
 
   const canvas = (
     <canvas
@@ -35,45 +28,41 @@ export default function GraphRoute() {
 
     const step = 2;
 
-    const damping = halflifeToDamping((w() / 2) * halflife()[0]);
-    const criticality = dampingRatioToCriticality(dampingRatio()[0], damping);
-    const spring = fromValues(
-      h() * 0.5,
-      0,
-      h() * target()[0],
-      damping,
-      criticality
-    );
+    const spring = {
+      position: h() * 0.5,
+      velocity: 0,
+      target: h() * target()[0],
+      damping: damping()[0],
+      stiffness: stiffness()[0],
+    };
 
     const context = canvas.getContext("2d")!;
     context.lineWidth = 4;
 
     context.beginPath();
-    context.moveTo(0, spring[2]);
-    context.lineTo(w(), spring[2]);
+    context.moveTo(0, spring.target);
+    context.lineTo(w(), spring.target);
     context.strokeStyle = "lightgray";
     context.stroke();
 
     context.beginPath();
-    context.moveTo(0, positionAt(...spring, 0));
     for (let x = 0; x < w(); x += step) {
-      const y = positionAt(...spring, x);
-      context.lineTo(x, y);
+      const y = positionAt(spring, x);
+      context[x === 0 ? "moveTo" : "lineTo"](x, y);
     }
     context.strokeStyle = "blue";
     context.stroke();
 
     context.beginPath();
-    context.moveTo(0, spring[2]);
     for (let x = 0; x < w(); x += step) {
-      const y = velocityAt(...spring, x);
-      context.lineTo(x, spring[2] + y * 100);
+      const y = velocityAt(spring, x);
+      context[x === 0 ? "moveTo" : "lineTo"](x, spring.target + y * 100);
     }
     context.strokeStyle = "orange";
     context.stroke();
 
     context.beginPath();
-    const x = duration(...spring, 1);
+    const x = duration(spring);
     context.moveTo(x, 0);
     context.lineTo(x, h());
     context.strokeStyle = "red";
@@ -87,24 +76,24 @@ export default function GraphRoute() {
           label="Target"
           value={target()}
           onChange={setTarget}
-          minValue={0}
-          maxValue={1}
+          minValue={-1}
+          maxValue={2}
           step={0.001}
         />
         <ControlsSlider
-          label="Damping Ratio"
-          value={dampingRatio()}
-          onChange={setDampingRatio}
-          minValue={0}
-          maxValue={1}
+          label="Stiffness"
+          value={stiffness()}
+          onChange={setStiffness}
+          minValue={-2}
+          maxValue={2}
           step={0.001}
         />
         <ControlsSlider
-          label="Half-life"
-          value={halflife()}
-          onChange={setHalflife}
-          minValue={0}
-          maxValue={1}
+          label="Damping"
+          value={damping()}
+          onChange={setDamping}
+          minValue={-1}
+          maxValue={2}
           step={0.001}
         />
       </Controls>

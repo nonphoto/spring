@@ -42,8 +42,5 @@
   "engines": {
     "node": ">=20",
     "pnpm": ">=9"
-  },
-  "dependencies": {
-    "@thi.ng/math": "5.11.21"
   }
 }
