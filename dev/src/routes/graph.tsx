@@ -47,18 +47,18 @@ export default function GraphRoute() {
 
     context.beginPath();
     for (let x = 0; x < w(); x += step) {
-      const y = positionAt(spring, x);
-      context[x === 0 ? "moveTo" : "lineTo"](x, y);
-    }
-    context.strokeStyle = "blue";
-    context.stroke();
-
-    context.beginPath();
-    for (let x = 0; x < w(); x += step) {
       const y = velocityAt(spring, x);
       context[x === 0 ? "moveTo" : "lineTo"](x, spring.target + y * 100);
     }
     context.strokeStyle = "orange";
+    context.stroke();
+
+    context.beginPath();
+    for (let x = 0; x < w(); x += step) {
+      const y = positionAt(spring, x);
+      context[x === 0 ? "moveTo" : "lineTo"](x, y);
+    }
+    context.strokeStyle = "blue";
     context.stroke();
 
     context.beginPath();
