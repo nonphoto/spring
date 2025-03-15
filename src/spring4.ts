@@ -44,7 +44,7 @@ export function positionAt4(out: Vec, s: VecSpring, t: number): Vec {
 export function velocityAt4(out: Vec, s: VecSpring, t: number): Vec {
   const stiffness = normalizeStiffness(s.stiffness);
   const damping = normalizeDamping(s.damping);
-  out[0] = internal.positionAt(
+  out[0] = internal.velocityAt(
     s.position[0],
     s.target[0],
     s.velocity[0],
@@ -52,7 +52,7 @@ export function velocityAt4(out: Vec, s: VecSpring, t: number): Vec {
     damping,
     t
   );
-  out[1] = internal.positionAt(
+  out[1] = internal.velocityAt(
     s.position[1],
     s.target[1],
     s.velocity[1],
@@ -60,7 +60,7 @@ export function velocityAt4(out: Vec, s: VecSpring, t: number): Vec {
     damping,
     t
   );
-  out[2] = internal.positionAt(
+  out[2] = internal.velocityAt(
     s.position[2],
     s.target[2],
     s.velocity[2],
@@ -68,7 +68,7 @@ export function velocityAt4(out: Vec, s: VecSpring, t: number): Vec {
     damping,
     t
   );
-  out[3] = internal.positionAt(
+  out[3] = internal.velocityAt(
     s.position[3],
     s.target[3],
     s.velocity[3],
