@@ -2,7 +2,7 @@ import { square } from "./internal";
 
 const TWO_LN2 = 2 * Math.LN2;
 
-export const defaultDamping = dampingFromHalflife(500);
+export const defaultDamping = dampingFromHalflife(200);
 export const defaultStiffness = stiffnessFromDamping(1, defaultDamping);
 
 export function normalizeHalflife(halflife: number): number {
