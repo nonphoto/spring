@@ -42,5 +42,8 @@
   "engines": {
     "node": ">=20",
     "pnpm": ">=9"
+  },
+  "dependencies": {
+    "@thi.ng/vectors": "^7.12.24"
   }
 }

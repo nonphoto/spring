@@ -1,13 +1,6 @@
 import * as internal from "./internal";
+import { Spring } from "./types";
 import { normalizeDamping, normalizeStiffness } from "./util";
-
-export interface Spring {
-  position: number;
-  velocity: number;
-  target: number;
-  stiffness: number;
-  damping: number;
-}
 
 export function positionAt(s: Spring, t: number): number {
   return internal.positionAt(

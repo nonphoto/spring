@@ -1,17 +1,9 @@
+import { Vec } from "@thi.ng/vectors";
 import * as internal from "./internal";
+import { VecSpring } from "./types";
 import { normalizeDamping, normalizeStiffness } from "./util";
 
-type Vec2 = [number, number];
-
-export interface Spring2 {
-  position: Vec2;
-  velocity: Vec2;
-  target: Vec2;
-  stiffness: number;
-  damping: number;
-}
-
-export function positionAt2(out: Vec2, s: Spring2, t: number): Vec2 {
+export function positionAt2(out: Vec, s: VecSpring, t: number): Vec {
   const stiffness = normalizeStiffness(s.stiffness);
   const damping = normalizeDamping(s.damping);
   out[0] = internal.positionAt(
@@ -33,7 +25,7 @@ export function positionAt2(out: Vec2, s: Spring2, t: number): Vec2 {
   return out;
 }
 
-export function velocityAt2(out: Vec2, s: Spring2, t: number): Vec2 {
+export function velocityAt2(out: Vec, s: VecSpring, t: number): Vec {
   const stiffness = normalizeStiffness(s.stiffness);
   const damping = normalizeDamping(s.damping);
   out[0] = internal.positionAt(
@@ -55,7 +47,7 @@ export function velocityAt2(out: Vec2, s: Spring2, t: number): Vec2 {
   return out;
 }
 
-export function duration2(s: Spring2, t: number): number {
+export function duration2(s: VecSpring, t: number): number {
   const stiffness = normalizeStiffness(s.stiffness);
   const damping = normalizeDamping(s.damping);
   return Math.max(
