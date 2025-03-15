@@ -63,7 +63,7 @@ export function velocityAt3(out: Vec, s: VecSpring, t: number): Vec {
   return out;
 }
 
-export function duration3(s: VecSpring, t: number): number {
+export function duration3(s: VecSpring, epsilon?: number): number {
   const stiffness = normalizeStiffness(s.stiffness);
   const damping = normalizeDamping(s.damping);
   return Math.max(
@@ -73,7 +73,7 @@ export function duration3(s: VecSpring, t: number): number {
       s.velocity[0],
       stiffness,
       damping,
-      t
+      epsilon
     ),
     internal.duration(
       s.position[1],
@@ -81,7 +81,7 @@ export function duration3(s: VecSpring, t: number): number {
       s.velocity[1],
       stiffness,
       damping,
-      t
+      epsilon
     ),
     internal.duration(
       s.position[2],
@@ -89,7 +89,7 @@ export function duration3(s: VecSpring, t: number): number {
       s.velocity[2],
       stiffness,
       damping,
-      t
+      epsilon
     )
   );
 }
