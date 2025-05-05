@@ -1,3 +1,4 @@
+export * as internal from "./internal.js";
 export * from "./spring.js";
 export * from "./spring2.js";
 export * from "./spring3.js";

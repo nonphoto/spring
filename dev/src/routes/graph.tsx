@@ -1,15 +1,38 @@
 import { createWindowSize } from "@solid-primitives/resize-observer";
 import { createEffect, createSignal } from "solid-js";
-import { duration, positionAt, velocityAt } from "~/../../src";
+import {
+  dampingFromHalflife,
+  duration,
+  stiffnessFromDamping,
+  velocityAt,
+} from "~/../../src";
 import { Controls, ControlsSlider } from "~/components/Controls";
+import { spring_damper_exact_stiffness_damping } from "../../../src/internal";
+
+function drawPolyline(
+  context: CanvasRenderingContext2D,
+  fn: (t: number) => number,
+  direction: "x" | "y",
+  length: number
+) {
+  context.beginPath();
+  for (let t = 0; t <= length; t += 2) {
+    context[t === 0 ? "moveTo" : "lineTo"](
+      direction === "x" ? t : fn(t),
+      direction === "y" ? t : fn(t)
+    );
+  }
+  context.stroke();
+}
 
 export default function GraphRoute() {
   const size = createWindowSize();
   const w = () => size.width * 2;
   const h = () => size.height * 2;
-
-  const [stiffness, setStiffness] = createSignal([0.005]);
-  const [damping, setDamping] = createSignal([0.005]);
+  const damping2 = dampingFromHalflife(200);
+  const stiffness2 = stiffnessFromDamping(1, damping2);
+  const [stiffness, setStiffness] = createSignal([stiffness2]);
+  const [damping, setDamping] = createSignal([damping2]);
   const [target, setTarget] = createSignal([0.75]);
 
   const canvas = (
@@ -26,8 +49,6 @@ export default function GraphRoute() {
     canvas.width = w();
     canvas.height = h();
 
-    const step = 2;
-
     const spring = {
       position: h() * 0.5,
       velocity: 0,
@@ -36,37 +57,49 @@ export default function GraphRoute() {
       stiffness: stiffness()[0],
     };
 
+    console.log(
+      duration(
+        {
+          damping: damping2,
+          stiffness: stiffness2,
+          position: 16,
+          target: 192,
+          velocity: 0,
+        },
+        10 // Why doesn't this do anything?
+      )
+    );
+
     const context = canvas.getContext("2d")!;
-    context.lineWidth = 4;
+    context.lineWidth = 2;
 
-    context.beginPath();
-    context.moveTo(0, spring.target);
-    context.lineTo(w(), spring.target);
     context.strokeStyle = "lightgray";
-    context.stroke();
+    drawPolyline(context, () => spring.target, "x", w());
 
-    context.beginPath();
-    for (let x = 0; x < w(); x += step) {
-      const y = velocityAt(spring, x);
-      context[x === 0 ? "moveTo" : "lineTo"](x, spring.target + y * 100);
-    }
     context.strokeStyle = "orange";
-    context.stroke();
+    drawPolyline(
+      context,
+      (t) => spring.target + velocityAt(spring, t),
+      "x",
+      w()
+    );
 
-    context.beginPath();
-    for (let x = 0; x < w(); x += step) {
-      const y = positionAt(spring, x);
-      context[x === 0 ? "moveTo" : "lineTo"](x, y);
-    }
     context.strokeStyle = "blue";
-    context.stroke();
-
-    context.beginPath();
-    const x = duration(spring);
-    context.moveTo(x, 0);
-    context.lineTo(x, h());
-    context.strokeStyle = "red";
-    context.stroke();
+    drawPolyline(
+      context,
+      (t) =>
+        spring_damper_exact_stiffness_damping(
+          spring.position,
+          spring.target,
+          spring.velocity,
+          0,
+          spring.stiffness,
+          spring.damping,
+          t
+        ),
+      "x",
+      w()
+    );
   });
 
   return (
