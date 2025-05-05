@@ -5,8 +5,9 @@ import { normalizeDamping, normalizeStiffness } from "./util";
 export function positionAt(s: Spring, t: number): number {
   return internal.positionAt(
     s.position,
-    s.target,
+    s.positionTarget,
     s.velocity,
+    s.velocityTarget,
     normalizeStiffness(s.stiffness),
     normalizeDamping(s.damping),
     t
@@ -16,8 +17,9 @@ export function positionAt(s: Spring, t: number): number {
 export function velocityAt(s: Spring, t: number): number {
   return internal.velocityAt(
     s.position,
-    s.target,
+    s.positionTarget,
     s.velocity,
+    s.velocityTarget,
     normalizeStiffness(s.stiffness),
     normalizeDamping(s.damping),
     t
@@ -27,8 +29,9 @@ export function velocityAt(s: Spring, t: number): number {
 export function duration(s: Spring, epsilon?: number): number {
   return internal.duration(
     s.position,
-    s.target,
+    s.positionTarget,
     s.velocity,
+    s.velocityTarget,
     normalizeStiffness(s.stiffness),
     normalizeDamping(s.damping),
     epsilon

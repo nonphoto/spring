@@ -3,11 +3,11 @@ import { createEffect, createSignal } from "solid-js";
 import {
   dampingFromHalflife,
   duration,
+  positionAt,
   stiffnessFromDamping,
   velocityAt,
 } from "~/../../src";
 import { Controls, ControlsSlider } from "~/components/Controls";
-import { spring_damper_exact_stiffness_damping } from "../../../src/internal";
 
 function drawPolyline(
   context: CanvasRenderingContext2D,
@@ -51,8 +51,9 @@ export default function GraphRoute() {
 
     const spring = {
       position: h() * 0.5,
+      positionTarget: h() * target()[0],
       velocity: 0,
-      target: h() * target()[0],
+      velocityTarget: 0,
       damping: damping()[0],
       stiffness: stiffness()[0],
     };
@@ -63,8 +64,9 @@ export default function GraphRoute() {
           damping: damping2,
           stiffness: stiffness2,
           position: 16,
-          target: 192,
+          positionTarget: 192,
           velocity: 0,
+          velocityTarget: 0,
         },
         10 // Why doesn't this do anything?
       )
@@ -74,32 +76,18 @@ export default function GraphRoute() {
     context.lineWidth = 2;
 
     context.strokeStyle = "lightgray";
-    drawPolyline(context, () => spring.target, "x", w());
+    drawPolyline(context, () => spring.positionTarget, "x", w());
 
     context.strokeStyle = "orange";
     drawPolyline(
       context,
-      (t) => spring.target + velocityAt(spring, t),
+      (t) => spring.positionTarget + 20 * velocityAt(spring, t),
       "x",
       w()
     );
 
     context.strokeStyle = "blue";
-    drawPolyline(
-      context,
-      (t) =>
-        spring_damper_exact_stiffness_damping(
-          spring.position,
-          spring.target,
-          spring.velocity,
-          0,
-          spring.stiffness,
-          spring.damping,
-          t
-        ),
-      "x",
-      w()
-    );
+    drawPolyline(context, (t) => positionAt(spring, t), "x", w());
   });
 
   return (
@@ -117,17 +105,17 @@ export default function GraphRoute() {
           label="Stiffness"
           value={stiffness()}
           onChange={setStiffness}
-          minValue={-2}
-          maxValue={2}
-          step={0.001}
+          minValue={0}
+          maxValue={0.001}
+          step={0.000001}
         />
         <ControlsSlider
           label="Damping"
           value={damping()}
           onChange={setDamping}
-          minValue={-1}
-          maxValue={2}
-          step={0.001}
+          minValue={0}
+          maxValue={0.1}
+          step={0.0001}
         />
       </Controls>
       {canvas}

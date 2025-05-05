@@ -2,16 +2,18 @@ import { Vec } from "@thi.ng/vectors";
 
 export interface Spring {
   position: number;
+  positionTarget: number;
   velocity: number;
-  target: number;
+  velocityTarget: number;
   stiffness: number;
   damping: number;
 }
 
 export interface VecSpring {
   position: Vec;
+  positionTarget: Vec;
   velocity: Vec;
-  target: Vec;
+  velocityTarget: Vec;
   stiffness: number;
   damping: number;
 }

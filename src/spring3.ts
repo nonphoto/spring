@@ -8,24 +8,27 @@ export function positionAt3(out: Vec, s: VecSpring, t: number): Vec {
   const damping = normalizeDamping(s.damping);
   out[0] = internal.positionAt(
     s.position[0],
-    s.target[0],
+    s.positionTarget[0],
     s.velocity[0],
+    s.velocityTarget[0],
     stiffness,
     damping,
     t
   );
   out[1] = internal.positionAt(
     s.position[1],
-    s.target[1],
+    s.positionTarget[1],
     s.velocity[1],
+    s.velocityTarget[1],
     stiffness,
     damping,
     t
   );
   out[2] = internal.positionAt(
     s.position[2],
-    s.target[2],
+    s.positionTarget[2],
     s.velocity[2],
+    s.velocityTarget[2],
     stiffness,
     damping,
     t
@@ -38,24 +41,27 @@ export function velocityAt3(out: Vec, s: VecSpring, t: number): Vec {
   const damping = normalizeDamping(s.damping);
   out[0] = internal.velocityAt(
     s.position[0],
-    s.target[0],
+    s.positionTarget[0],
     s.velocity[0],
+    s.velocityTarget[0],
     stiffness,
     damping,
     t
   );
   out[1] = internal.velocityAt(
     s.position[1],
-    s.target[1],
+    s.positionTarget[1],
     s.velocity[1],
+    s.velocityTarget[1],
     stiffness,
     damping,
     t
   );
   out[2] = internal.velocityAt(
     s.position[2],
-    s.target[2],
+    s.positionTarget[2],
     s.velocity[2],
+    s.velocityTarget[2],
     stiffness,
     damping,
     t
@@ -69,24 +75,27 @@ export function duration3(s: VecSpring, epsilon?: number): number {
   return Math.max(
     internal.duration(
       s.position[0],
-      s.target[0],
+      s.positionTarget[0],
       s.velocity[0],
+      s.velocityTarget[0],
       stiffness,
       damping,
       epsilon
     ),
     internal.duration(
       s.position[1],
-      s.target[1],
+      s.positionTarget[1],
       s.velocity[1],
+      s.velocityTarget[1],
       stiffness,
       damping,
       epsilon
     ),
     internal.duration(
       s.position[2],
-      s.target[2],
+      s.positionTarget[2],
       s.velocity[2],
+      s.velocityTarget[2],
       stiffness,
       damping,
       epsilon
