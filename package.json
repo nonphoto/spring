@@ -1,7 +1,14 @@
 {
   "name": "@nonphoto/spring",
   "version": "0.0.0",
+  "author": "Jonas Luebbers <jonas@jonasluebbers.com> (https://www.jonasluebbers.com)",
+  "license": "MIT",
   "description": "Low-level spring physics toolbox",
+  "keywords": [
+    "spring",
+    "physics",
+    "animation"
+  ],
   "type": "module",
   "sideEffects": false,
   "publishConfig": {
@@ -27,23 +34,16 @@
     "build": "tsup ./src/index.ts --dts --format esm --clean",
     "release": "semantic-release"
   },
-  "keywords": [
-    "spring",
-    "physics",
-    "animation"
-  ],
-  "author": "Jonas Luebbers <jonas@jonasluebbers.com> (https://www.jonasluebbers.com)",
-  "license": "MIT",
+  "dependencies": {
+    "@thi.ng/vectors": "^7.12.24"
+  },
   "devDependencies": {
     "semantic-release": "24.2.3",
     "tsup": "8.4.0",
     "typescript": "5.8.2"
   },
   "engines": {
-    "node": ">=20",
-    "pnpm": ">=9"
+    "node": ">=20"
   },
-  "dependencies": {
-    "@thi.ng/vectors": "^7.12.24"
-  }
+  "packageManager": "pnpm@10.12.1"
 }
