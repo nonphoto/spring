@@ -84,15 +84,3 @@ export function velocityAt(
     return -y * d * r - y * t * j * r + j * r;
   }
 }
-
-export function duration(
-  position: number,
-  positionTarget: number,
-  velocity: number,
-  velocityTarget: number,
-  stiffness: number,
-  damping: number,
-  epsilon: number = 1
-) {
-  return 0;
-}

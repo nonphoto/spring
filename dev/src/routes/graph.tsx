@@ -1,10 +1,10 @@
 import { createWindowSize } from "@solid-primitives/resize-observer";
 import { createEffect, createSignal } from "solid-js";
 import {
-  dampingFromHalflife,
+  defaultDamping,
+  defaultStiffness,
   duration,
   positionAt,
-  stiffnessFromDamping,
   velocityAt,
 } from "~/../../src";
 import { Controls, ControlsSlider } from "~/components/Controls";
@@ -29,10 +29,8 @@ export default function GraphRoute() {
   const size = createWindowSize();
   const w = () => size.width * 2;
   const h = () => size.height * 2;
-  const damping2 = dampingFromHalflife(200);
-  const stiffness2 = stiffnessFromDamping(1, damping2);
-  const [stiffness, setStiffness] = createSignal([stiffness2]);
-  const [damping, setDamping] = createSignal([damping2]);
+  const [stiffness, setStiffness] = createSignal([defaultStiffness]);
+  const [damping, setDamping] = createSignal([defaultDamping]);
   const [target, setTarget] = createSignal([0.75]);
 
   const canvas = (
@@ -58,20 +56,6 @@ export default function GraphRoute() {
       stiffness: stiffness()[0],
     };
 
-    console.log(
-      duration(
-        {
-          damping: damping2,
-          stiffness: stiffness2,
-          position: 16,
-          positionTarget: 192,
-          velocity: 0,
-          velocityTarget: 0,
-        },
-        10 // Why doesn't this do anything?
-      )
-    );
-
     const context = canvas.getContext("2d")!;
     context.lineWidth = 2;
 
@@ -88,6 +72,9 @@ export default function GraphRoute() {
 
     context.strokeStyle = "blue";
     drawPolyline(context, (t) => positionAt(spring, t), "x", w());
+
+    context.strokeStyle = "red";
+    drawPolyline(context, () => duration(spring), "y", h());
   });
 
   return (

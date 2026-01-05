@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@thi.ng/math':
+        specifier: 5.11.27
+        version: 5.11.27
       '@thi.ng/vectors':
         specifier: ^7.12.24
         version: 7.12.24
@@ -426,6 +429,10 @@ packages:
     resolution: {integrity: sha512-SbgnYcuyIKvJF+bdpFNZJxggYa6wBt7xh4OjWZwvmbZvibrjvk4xwLaJ8vm/bJoBYK/Oe631CApssa6kumZeNg==}
     engines: {node: '>=18'}
 
+  '@thi.ng/api@8.11.27':
+    resolution: {integrity: sha512-KAERK4pdeVCtM1uh8crl8eGmcd7pTdd6QmLWbbGU7gb+xTXbkPP8K4vOcsfpUYyg6jNCAEo/x0GdKol1qOtA8A==}
+    engines: {node: '>=18'}
+
   '@thi.ng/arrays@2.10.19':
     resolution: {integrity: sha512-wC1Jkvej8zDfSXZmIGp6qMg452mjt4BExMWSaVqaLbMKYszGLgMHJAa8PTUfHrK5A2wQXn35uZwpVbWd+jeubA==}
     engines: {node: '>=18'}
@@ -458,8 +465,8 @@ packages:
     resolution: {integrity: sha512-X4YVOByqPZYjIlqdDoZOpzNGW8FF5T2yWuAP3j80RPkVsgX2BM+gQYPyY7kkDe3gzWaRJIYE2TIwFHM+0RogJw==}
     engines: {node: '>=18'}
 
-  '@thi.ng/math@5.11.22':
-    resolution: {integrity: sha512-HpYCjOAZWfpiaGd4dVYrqYI8MbnOCpJWBDCUmGIienNCNnjov4iwmsHhi52kVCEIz3bDJtaEkPqB6L663wvCSw==}
+  '@thi.ng/math@5.11.27':
+    resolution: {integrity: sha512-AcFiX7+iOQhheB1m/pFz5LGAp4+C6Mgh/RraDqBcSPGLyaLNGr4JpZFrxsECovbLK1Jvos46I8Mq240M6j7w8A==}
     engines: {node: '>=18'}
 
   '@thi.ng/memoize@4.0.12':
@@ -2062,6 +2069,8 @@ snapshots:
 
   '@thi.ng/api@8.11.22': {}
 
+  '@thi.ng/api@8.11.27': {}
+
   '@thi.ng/arrays@2.10.19':
     dependencies:
       '@thi.ng/api': 8.11.22
@@ -2094,9 +2103,9 @@ snapshots:
 
   '@thi.ng/hex@2.3.66': {}
 
-  '@thi.ng/math@5.11.22':
+  '@thi.ng/math@5.11.27':
     dependencies:
-      '@thi.ng/api': 8.11.22
+      '@thi.ng/api': 8.11.27
 
   '@thi.ng/memoize@4.0.12':
     dependencies:
@@ -2124,7 +2133,7 @@ snapshots:
       '@thi.ng/compare': 2.4.14
       '@thi.ng/compose': 3.0.25
       '@thi.ng/errors': 2.5.28
-      '@thi.ng/math': 5.11.22
+      '@thi.ng/math': 5.11.27
       '@thi.ng/random': 4.1.13
       '@thi.ng/timestamp': 1.1.7
 
@@ -2135,7 +2144,7 @@ snapshots:
       '@thi.ng/checks': 3.7.2
       '@thi.ng/equiv': 2.1.78
       '@thi.ng/errors': 2.5.28
-      '@thi.ng/math': 5.11.22
+      '@thi.ng/math': 5.11.27
       '@thi.ng/memoize': 4.0.12
       '@thi.ng/random': 4.1.13
       '@thi.ng/strings': 3.9.7
